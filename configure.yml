@@ -1,0 +1,14 @@
+urls:
+  - "https://www.google.com"
+  - "https://www.duckduckgo.com"
+  - "https://blog.carlolobrano.com"
+  - "https://nonexistentwebsite.com"
+timeout: 5
+schedule:
+  hour: 1
+  minute: 0
+  second: 0
+action:
+  on-failure:
+    telegram: true
+    email: false
