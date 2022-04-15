@@ -11,9 +11,8 @@ import (
 	"strconv"
 )
 
-const (
-	url = "https://api.telegram.org/bot<TOKEN>/sendMessage"
-)
+var token string = os.Getenv("TELEGRAM_TOKEN")
+var url string = "https://api.telegram.org/bot" + token + "/sendMessage"
 
 type Notifiable interface {
 	Send() error
