@@ -1,8 +1,7 @@
-.PHONY: test
+.PHONY: tests
 
 all:
 	go build
 
-
-test:
-	go test
+tests:
+	go test -v
