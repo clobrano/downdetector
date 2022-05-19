@@ -16,7 +16,7 @@ func Connect(url string, t time.Duration) error {
 	}
 	_, err := client.Get(url)
 	if err != nil {
-		log.Printf("could not connect to %s\n", url)
+		log.Printf("could not connect to %s: %v\n", url, err)
 		return err
 	}
 	log.Printf("successfully connect to %s\n", url)
