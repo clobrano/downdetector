@@ -34,16 +34,18 @@ func main() {
 	var logging_file_name string
 
 	flag.StringVar(&config_file_name, "configure", "configure.yml", "The configuration file name")
-	flag.StringVar(&logging_file_name, "logfile", "logger.log", "The logging file name")
+	flag.StringVar(&logging_file_name, "logfile", "", "The logging file name")
 
 	flag.Parse()
 
-	f, err := os.OpenFile(logging_file_name, os.O_CREATE|os.O_RDWR, 0666)
-	defer f.Close()
-	if err != nil {
-		log.Panicf("could not open logging file: %+v\n", err)
+	if len(logging_file_name) > 0 {
+		f, err := os.OpenFile(logging_file_name, os.O_CREATE|os.O_RDWR, 0666)
+		defer f.Close()
+		if err != nil {
+			log.Panicf("could not open logging file: %+v\n", err)
+		}
+		log.SetOutput(f)
 	}
-	log.SetOutput(f)
 
 	for {
 		config, err := NewConfiguration(config_file_name)
