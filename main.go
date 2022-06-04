@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 // Connect attemps to connect to a url. It returns with error if it does not succeed in 5 seconds
@@ -24,6 +26,10 @@ func Connect(url string, t time.Duration) error {
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	var config_file_name string
 	var logging_file_name string
 

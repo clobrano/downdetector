@@ -11,9 +11,6 @@ import (
 	"strconv"
 )
 
-var token string = os.Getenv("TELEGRAM_TOKEN")
-var url string = "https://api.telegram.org/bot" + token + "/sendMessage"
-
 type Notifiable interface {
 	Send() error
 }
@@ -37,6 +34,8 @@ func (m *TelegramMessage) Send() error {
 	if err != nil {
 		return err
 	}
+	token := os.Getenv("TELEGRAM_TOKEN")
+	url := "https://api.telegram.org/bot" + token + "/sendMessage"
 	response, err := http.Post(url, "application/json", bytes.NewReader(payload))
 	if err != nil {
 		return err
