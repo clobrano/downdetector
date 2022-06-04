@@ -59,9 +59,12 @@ func main() {
 				if config.Action.On_failure.Telegram {
 					notify, err := NewTelegramMessage(msg)
 					if err != nil {
-						log.Printf("could not notify via Telegram: %v", err)
+						log.Printf("could not create Telegram notifier: %v", err)
 					} else {
-						notify.Send()
+						err = notify.Send()
+						if err != nil {
+							log.Fatalf("could not notify via Telegram: %v", err)
+						}
 					}
 				}
 			}
