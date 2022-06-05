@@ -5,14 +5,31 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
 )
 
-type Notifiable interface {
-	Send() error
+func Notify(message string, writer io.Writer) error {
+	_, err := fmt.Fprint(writer, message)
+	return err
+}
+
+const telegram_api = "https://api.telegram.org"
+
+type TelegramNotify struct {
+	baseurl string
+	chatId  int64
+	token   string
+}
+
+func NewTelegramNotify() (TelegramNotify, error) {
+	client_id, err := strconv.ParseInt(os.Getenv("WEB_CHECKER_TELEGRAM_CLIENT_ID"), 10, 64)
+	if err != nil {
+		return TelegramNotify{}, err
+	}
+	token := os.Getenv("TELEGRAM_TOKEN")
+	return TelegramNotify{telegram_api, client_id, token}, nil
 }
 
 // Message represents a Telegram message.
@@ -21,32 +38,20 @@ type TelegramMessage struct {
 	Text   string `json:"text"`
 }
 
-func NewTelegramMessage(message string) (*TelegramMessage, error) {
-	client_id, err := strconv.ParseInt(os.Getenv("WEB_CHECKER_TELEGRAM_CLIENT_ID"), 10, 64)
+func (t *TelegramNotify) Write(p []byte) (n int, err error) {
+	payload, err := json.Marshal(TelegramMessage{t.chatId, string(p)})
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	return &TelegramMessage{client_id, message}, nil
-}
 
-func (m *TelegramMessage) Send() error {
-	payload, err := json.Marshal(*m)
-	if err != nil {
-		return err
-	}
-	token := os.Getenv("TELEGRAM_TOKEN")
-	url := "https://api.telegram.org/bot" + token + "/sendMessage"
+	url := fmt.Sprintf("%s/bot%s/sendMessage", t.baseurl, t.token)
 	response, err := http.Post(url, "application/json", bytes.NewReader(payload))
 	if err != nil {
-		return err
+		return 0, err
 	}
-	defer func(body io.ReadCloser) {
-		if err := body.Close(); err != nil {
-			log.Println("could not close response body")
-		}
-	}(response.Body)
+	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("Send message failed: Status was %v", response.StatusCode)
+		return 0, fmt.Errorf("Send message failed: Status was %v (%s)", response.StatusCode, url)
 	}
-	return nil
+	return len(p), nil
 }
