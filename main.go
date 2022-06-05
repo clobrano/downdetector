@@ -25,11 +25,15 @@ func Connect(url string, t time.Duration) error {
 	return err
 }
 
-func main() {
+func LoadEnvironment() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+}
+
+func main() {
+	LoadEnvironment()
 	var config_file_name string
 	var logging_file_name string
 
@@ -59,14 +63,14 @@ func main() {
 					url, err)
 
 				if config.Action.On_failure.Telegram {
-					notify, err := NewTelegramMessage(msg)
+					notifier, err := NewTelegramNotify()
 					if err != nil {
 						log.Printf("could not create Telegram notifier: %v", err)
-					} else {
-						err = notify.Send()
-						if err != nil {
-							log.Fatalf("could not notify via Telegram: %v", err)
-						}
+						continue
+					}
+					err = Notify(msg, &notifier)
+					if err != nil {
+						log.Fatalf("could not notify via Telegram: %v", err)
 					}
 				}
 			}
